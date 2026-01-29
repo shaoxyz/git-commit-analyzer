@@ -60,6 +60,16 @@ npx skills add shaoxyz/git-commit-analyzer
 
 AI 会自动完成：获取提交 → 代码分析 → 生成报告 → 输出牛马鉴定结果。
 
+## 示例报告
+
+![牛马鉴定报告预览](./examples/report-preview.png)
+
+<details>
+<summary>查看完整 HTML 报告</summary>
+
+下载 [examples/git-commit-report-2026-01-29.html](./examples/git-commit-report-2026-01-29.html) 后用浏览器打开。
+</details>
+
 ## 文档
 
 [完整文档 & 评分算法](./skills/git-commit-analyzer/SKILL.md)
