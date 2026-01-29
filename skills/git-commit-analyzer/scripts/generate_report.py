@@ -25,11 +25,13 @@ I18N = {
         "name": "牛马",
         "score": "得分",
         "grade": "等级",
-        "title": "称号",
+        "person_title": "称号",
         "award": "颁奖词",
         "commits": "提交数",
         "effective_lines": "有效行数",
         "badges": "徽章",
+        "ai_survivor": "AI 生存指数",
+        "ai_verdict": "AI 审判",
         "commit_details": "📝 提交明细",
         "complexity": "技术深度",
         "impact": "影响范围",
@@ -37,10 +39,16 @@ I18N = {
         "bullshit": "水分",
         "quality": "质量系数",
         "final": "最终得分",
+        "rewrite_index": "重写指数",
+        "business_value": "业务价值",
         "wall_of_shame": "🚨 耻辱墙",
+        "ai_era_verdict": "🤖 AI 时代审判",
+        "most_irreplaceable": "最不可替代",
+        "most_replaceable": "最易被替代",
+        "team_future": "团队前景",
         "daily_roast": "🎤 今日金句",
         "closing_rant": "🎤 Linus 收尾",
-        "disclaimer": "本报告由 AI 生成，仅供娱乐，严禁用于绩效评估。",
+        "disclaimer": "本报告由 AI 生成，仅供娱乐，严禁用于绩效评估。在 AI 时代，代码量不代表贡献，脑子才是。",
     },
     "en": {
         "title": "🐂🐴 Code Commit Report",
@@ -58,11 +66,13 @@ I18N = {
         "name": "Name",
         "score": "Score",
         "grade": "Grade",
-        "title": "Title",
+        "person_title": "Title",
         "award": "Award",
         "commits": "Commits",
         "effective_lines": "Effective Lines",
         "badges": "Badges",
+        "ai_survivor": "AI Survivor Score",
+        "ai_verdict": "AI Verdict",
         "commit_details": "📝 Commit Details",
         "complexity": "Complexity",
         "impact": "Impact",
@@ -70,10 +80,16 @@ I18N = {
         "bullshit": "Bullshit",
         "quality": "Quality",
         "final": "Final Score",
+        "rewrite_index": "Rewrite Index",
+        "business_value": "Business Value",
         "wall_of_shame": "🚨 Wall of Shame",
+        "ai_era_verdict": "🤖 AI Era Verdict",
+        "most_irreplaceable": "Most Irreplaceable",
+        "most_replaceable": "Most Replaceable",
+        "team_future": "Team Future",
         "daily_roast": "🎤 Daily Roast",
         "closing_rant": "🎤 Linus Closing",
-        "disclaimer": "This report is AI-generated for entertainment only. Not for performance evaluation.",
+        "disclaimer": "This report is AI-generated for entertainment only. Not for performance evaluation. In the AI era, code volume ≠ contribution. Brains matter.",
     },
 }
 
@@ -155,7 +171,22 @@ def generate_markdown_report(analysis: dict, lang: str = "zh") -> str:
                 lines.append(f"> 💬 {entry['summary']}")
             if entry.get("linus_review"):
                 lines.append(f'> 🔥 Linus: *"{entry["linus_review"]}"*')
-            if entry.get("summary") or entry.get("linus_review"):
+
+            if entry.get("ai_survivor_score") is not None:
+                lines.append("")
+                lines.append(
+                    f"**{t['ai_survivor']}**: {entry['ai_survivor_score']}/100"
+                )
+                if entry.get("ai_verdict"):
+                    lines.append(f"> 🤖 {entry['ai_verdict']}")
+                if entry.get("future_advice"):
+                    lines.append(f"> 💡 {entry['future_advice']}")
+
+            if (
+                entry.get("summary")
+                or entry.get("linus_review")
+                or entry.get("ai_survivor_score")
+            ):
                 lines.append("")
 
     commits = analysis.get("commits", [])
@@ -176,20 +207,33 @@ def generate_markdown_report(analysis: dict, lang: str = "zh") -> str:
             )
             lines.append("")
 
-            complexity = c.get("complexity", "")
-            impact = c.get("impact", "")
-            if complexity and impact:
+            rewrite_idx = c.get("rewrite_index")
+            biz_value = c.get("business_value")
+
+            if rewrite_idx and biz_value:
                 lines.append(
-                    f"{t['complexity']}: {complexity}/5 | {t['impact']}: {impact}/5 | "
-                    f"**{t['final']}: {c.get('final_score', c.get('effort_score', 0))}**"
-                )
-            else:
-                lines.append(
-                    f"{t['substance']}: {c.get('substance_score', 0)} | "
-                    f"{t['bullshit']}: {c.get('bullshit_score', 0)} | "
+                    f"{t['rewrite_index']}: {rewrite_idx}/5 | {t['business_value']}: {biz_value} | "
                     f"**{t['final']}: {c.get('final_score', 0)}**"
                 )
+            else:
+                complexity = c.get("complexity", "")
+                impact = c.get("impact", "")
+                if complexity and impact:
+                    lines.append(
+                        f"{t['complexity']}: {complexity}/5 | {t['impact']}: {impact}/5 | "
+                        f"**{t['final']}: {c.get('final_score', c.get('effort_score', 0))}**"
+                    )
+                else:
+                    lines.append(
+                        f"{t['substance']}: {c.get('substance_score', 0)} | "
+                        f"{t['bullshit']}: {c.get('bullshit_score', 0)} | "
+                        f"**{t['final']}: {c.get('final_score', 0)}**"
+                    )
             lines.append("")
+
+            if c.get("ai_could_write"):
+                lines.append(f"> 🤖 {c['ai_could_write']}")
+                lines.append("")
 
             if c.get("roast"):
                 lines.append(f"> 💬 {c['roast']}")
@@ -210,6 +254,29 @@ def generate_markdown_report(analysis: dict, lang: str = "zh") -> str:
         for item in wall:
             lines.append(f"- {item}")
         lines.append("")
+
+    ai_verdict = analysis.get("ai_era_verdict", {})
+    if ai_verdict:
+        lines.append(f"## {t['ai_era_verdict']}")
+        lines.append("")
+        if ai_verdict.get("team_ai_survivor_score") is not None:
+            lines.append(
+                f"**{t['ai_survivor']}**: {ai_verdict['team_ai_survivor_score']}/100"
+            )
+        if ai_verdict.get("most_irreplaceable"):
+            lines.append(
+                f"**{t['most_irreplaceable']}**: {ai_verdict['most_irreplaceable']}"
+            )
+        if ai_verdict.get("most_replaceable"):
+            lines.append(
+                f"**{t['most_replaceable']}**: {ai_verdict['most_replaceable']}"
+            )
+        if ai_verdict.get("team_future"):
+            lines.append(f"**{t['team_future']}**: {ai_verdict['team_future']}")
+        lines.append("")
+        if ai_verdict.get("linus_ai_rant"):
+            lines.append(f'> 🔥 Linus: *"{ai_verdict["linus_ai_rant"]}"*')
+            lines.append("")
 
     if analysis.get("daily_roast"):
         lines.append("---")

@@ -18,7 +18,7 @@ PROMPT_ZH = """
 - 识破摸鱼和刷 commit 的行为
 - 客观公正，不会因为代码量大就给高分
 
-## 客观分析数据（机器计算，不可更改）
+## 参考数据（机器计算，仅供参考）
 
 {metrics_json}
 
@@ -28,20 +28,29 @@ PROMPT_ZH = """
 
 ## 你的任务
 
-基于客观数据 + 代码审查，给出牛马鉴定结果。
+在 AI 时代，代码量不代表贡献，**脑子才是**。
 
-### 评分规则
+你的核心任务：判断这些代码的**真实价值**，而不是数行数。
 
-**substance_score（实质分）由机器计算，你只能微调 ±10%**
+### 2026 评分规则
 
-最终得分 = substance_score × quality_multiplier
+**旧时代指标（参考用）**：substance_score、bullshit_score 由机器计算，可作为参考
+**新时代核心**：重写指数 + 业务价值 = 真正的评判标准
 
-quality_multiplier（代码质量系数）：
-- 1.2: 代码写得漂亮，建议涨薪
-- 1.0: 正常水平，完成 KPI
-- 0.8: 能跑但是丑，欠喷
-- 0.5: 屎山但能用
-- 0.2: 这也能叫代码？
+最终得分 = 基础分 × 价值系数 × AI生存系数
+
+价值系数：
+- 1.5: 💎 核心资产 - 动这个要买保险
+- 1.0: 🧱 支撑设施 - 脏活累活
+- 0.6: 🎨 锦上添花 - 老板喜欢用户无感
+- 0.2: 💀 存在即浪费 - 删了没人发现
+
+AI生存系数（基于重写指数）：
+- 重写指数 5: ×1.3（不可替代）
+- 重写指数 4: ×1.1
+- 重写指数 3: ×1.0
+- 重写指数 2: ×0.8
+- 重写指数 1: ×0.5（AI 随手写）
 
 ### 牛马等级
 
@@ -80,6 +89,38 @@ quality_multiplier（代码质量系数）：
 - 打工人版："格式化也敢算工作量？"
 - Linus 版："Reformatting code is not a contribution, it's noise."
 
+---
+
+## 🤖 AI 时代审判（2026 年新增）
+
+在 Vibe Coding 时代，80%+ 代码可被 AI 快速生成。你的新任务：
+
+### 重写指数（给每个 commit 打分）
+
+| 分数 | 含义 | Linus 说 |
+|------|------|----------|
+| 1/5 | AI 10 分钟搞定 | "Why did a human write this?" |
+| 2/5 | AI 需要一些上下文 | "An intern with ChatGPT could do this." |
+| 3/5 | 需要业务知识输入 | "At least you know the domain." |
+| 4/5 | AI 只能写框架 | "Okay, you actually thought about this." |
+| 5/5 | AI 写不出来 | "Finally, irreplaceable human value." |
+
+### 业务价值（给每个 commit 定性）
+
+| 等级 | 定义 | 打工人说 |
+|------|------|----------|
+| 💎 核心资产 | 直接影响收入/用户 | "动这个代码记得买保险" |
+| 🧱 支撑设施 | 基础设施、工具链 | "脏活累活有人干" |
+| 🎨 锦上添花 | 体验优化、UI 调整 | "老板喜欢，用户无感" |
+| 💀 存在即浪费 | 没人用、没人懂 | "删了也没人发现" |
+
+### AI 时代总评
+
+每个人额外给出：
+- **ai_survivor_score**: 0-100，衡量这个人的工作多少是"AI 替代不了的"
+- **ai_verdict**: 一句话判决
+- **future_advice**: 给这个人的 AI 时代生存建议
+
 ## 输出格式（必须是有效 JSON）
 
 ```json
@@ -110,7 +151,10 @@ quality_multiplier（代码质量系数）：
       "effective_lines": 0,
       "badges": [],
       "summary": "打工人风格的一句话点评",
-      "linus_review": "Linus 风格的点评"
+      "linus_review": "Linus 风格的点评",
+      "ai_survivor_score": 75,
+      "ai_verdict": "AI 时代判决（如：能活，但要转型）",
+      "future_advice": "给这个人的生存建议"
     }}
   ],
   "commits": [
@@ -126,10 +170,20 @@ quality_multiplier（代码质量系数）：
       "roast": "打工人风格吐槽",
       "linus_says": "Linus 风格点评",
       "code_quality": "good/acceptable/poor/shit",
-      "badges": []
+      "badges": [],
+      "rewrite_index": 3,
+      "business_value": "💎 核心资产 / 🧱 支撑设施 / 🎨 锦上添花 / 💀 存在即浪费",
+      "ai_could_write": "AI 能否写出这段代码的判断"
     }}
   ],
   "wall_of_shame": ["今天最烂的代码/行为"],
+  "ai_era_verdict": {{
+    "team_ai_survivor_score": 65,
+    "most_irreplaceable": "最不可被 AI 替代的人",
+    "most_replaceable": "最容易被 AI 替代的人（善意提醒）",
+    "team_future": "团队在 AI 时代的前景判断",
+    "linus_ai_rant": "Linus 对 AI 时代程序员的毒舌点评"
+  }},
   "daily_roast": "打工人风格的今日金句",
   "closing_rant": "Linus 风格的收尾吐槽"
 }}
@@ -152,7 +206,7 @@ Your style:
 - Detect slacking and commit-padding behavior
 - Judge objectively by quality, not volume
 
-## Objective Analysis Data (machine-calculated, immutable)
+## Reference Data (machine-calculated, for reference only)
 
 {metrics_json}
 
@@ -162,20 +216,29 @@ Your style:
 
 ## Your Task
 
-Based on objective data + code review, deliver your evaluation.
+In the AI era, code volume ≠ contribution. **Brains matter.**
 
-### Scoring Rules
+Your core mission: Judge the **real value** of this code, not line counts.
 
-**substance_score is machine-calculated. You can only adjust ±10%**
+### 2026 Scoring Rules
 
-final_score = substance_score × quality_multiplier
+**Old-era metrics (reference only)**: substance_score, bullshit_score are machine-calculated
+**New-era core**: Rewrite Index + Business Value = The real judgment
 
-quality_multiplier (code quality):
-- 1.2: Beautiful code, raise-worthy
-- 1.0: Normal level, meets expectations
-- 0.8: Runs but ugly, needs roasting
-- 0.5: Shit but works
-- 0.2: You call this code?
+final_score = base_score × value_multiplier × ai_survival_multiplier
+
+Value Multiplier:
+- 1.5: 💎 Core Asset - Touch this and buy insurance
+- 1.0: 🧱 Infrastructure - Dirty work
+- 0.6: 🎨 Nice to Have - Boss likes, users don't notice
+- 0.2: 💀 Waste - Delete it, no one will know
+
+AI Survival Multiplier (based on Rewrite Index):
+- Rewrite Index 5: ×1.3 (irreplaceable)
+- Rewrite Index 4: ×1.1
+- Rewrite Index 3: ×1.0
+- Rewrite Index 2: ×0.8
+- Rewrite Index 1: ×0.5 (AI writes it casually)
 
 ### Grades
 
@@ -191,6 +254,38 @@ quality_multiplier (code quality):
 
 Positive: 🚀 Firefighter | 🏗️ Infra Builder | 📚 Doc Hero | 🧹 Debt Cleaner | 💥 Delete Master
 Negative: 🎨 Pixel Pusher | 🤖 AI-Shaped | 📋 Copy-Paste Master | 🤡 Commit Padder | 💀 Shit Factory
+
+---
+
+## 🤖 AI Era Judgment (2026 Edition)
+
+In the Vibe Coding era, 80%+ of code can be AI-generated. Your new mission:
+
+### Rewrite Index (score each commit)
+
+| Score | Meaning | Linus Says |
+|-------|---------|------------|
+| 1/5 | AI does it in 10 min | "Why did a human write this?" |
+| 2/5 | AI needs some context | "An intern with ChatGPT could do this." |
+| 3/5 | Needs domain knowledge | "At least you know the domain." |
+| 4/5 | AI can only scaffold | "Okay, you actually thought about this." |
+| 5/5 | AI can't write this | "Finally, irreplaceable human value." |
+
+### Business Value (classify each commit)
+
+| Level | Definition | Worker Says |
+|-------|------------|-------------|
+| 💎 Core Asset | Directly affects revenue/users | "Touch this and buy insurance" |
+| 🧱 Infrastructure | Tooling, foundation | "Dirty work, someone gotta do it" |
+| 🎨 Nice to Have | UX polish, UI tweaks | "Boss likes it, users don't notice" |
+| 💀 Waste | No one uses, no one understands | "Delete it, no one will know" |
+
+### AI Era Verdict
+
+For each person, also provide:
+- **ai_survivor_score**: 0-100, how much of their work is "AI-proof"
+- **ai_verdict**: One-line judgment
+- **future_advice**: Career advice for the AI era
 
 ## Output Format (must be valid JSON)
 
@@ -222,11 +317,35 @@ Negative: 🎨 Pixel Pusher | 🤖 AI-Shaped | 📋 Copy-Paste Master | 🤡 Com
       "effective_lines": 0,
       "badges": [],
       "summary": "Fun style one-liner",
-      "linus_review": "Linus-style review"
+      "linus_review": "Linus-style review",
+      "ai_survivor_score": 75,
+      "ai_verdict": "AI era judgment (e.g., Will survive, but needs to adapt)",
+      "future_advice": "Career advice for this person"
     }}
   ],
-  "commits": [...],
+  "commits": [
+    {{
+      "sha": "short sha",
+      "author": "author",
+      "complexity": 3,
+      "impact": 3,
+      "final_score": 0,
+      "roast": "Fun style roast",
+      "linus_says": "Linus style comment",
+      "badges": [],
+      "rewrite_index": 3,
+      "business_value": "💎 Core Asset / 🧱 Infrastructure / 🎨 Nice to Have / 💀 Waste",
+      "ai_could_write": "Whether AI could write this"
+    }}
+  ],
   "wall_of_shame": ["Today's worst code/behavior"],
+  "ai_era_verdict": {{
+    "team_ai_survivor_score": 65,
+    "most_irreplaceable": "Most AI-proof person",
+    "most_replaceable": "Most AI-replaceable person (kind reminder)",
+    "team_future": "Team's outlook in the AI era",
+    "linus_ai_rant": "Linus's rant about programmers in AI era"
+  }},
   "daily_roast": "Fun style daily quote",
   "closing_rant": "Linus-style closing rant"
 }}

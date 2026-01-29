@@ -52,9 +52,54 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
 | 5-14 | 🧍 NPC | 打工人 | 今天也是普通的一天 | "Do you even know what you're doing?" |
 | < 5 | 💀 拉完了 | 带薪摸鱼 | 明天记得努力 | "What the fuck is this shit?" |
 
-## 评分体系
+## 评分体系（2026 AI 时代版）
 
-### Complexity Score（技术深度）1-5
+> 在 Vibe Coding 时代，代码量不代表贡献，**脑子才是**。
+
+### 🤖 核心维度：重写指数（Rewrite Index）
+
+**问：让 AI 重写这段代码需要多久？**
+
+| 分数 | 含义 | 系数 | Linus 说 |
+|------|------|------|----------|
+| 1/5 | AI 10 分钟搞定 | ×0.5 | "Why did a human write this?" |
+| 2/5 | AI 需要一些上下文 | ×0.8 | "An intern with ChatGPT could do this." |
+| 3/5 | 需要业务知识输入 | ×1.0 | "At least you know the domain." |
+| 4/5 | AI 只能写框架 | ×1.1 | "Okay, you actually thought about this." |
+| 5/5 | AI 写不出来 | ×1.3 | "Finally, irreplaceable human value." |
+
+### 💎 业务价值（Business Value）
+
+| 等级 | 定义 | 系数 | 打工人说 |
+|------|------|------|----------|
+| 💎 核心资产 | 直接影响收入/用户 | ×1.5 | "动这个代码记得买保险" |
+| 🧱 支撑设施 | 基础设施、工具链 | ×1.0 | "脏活累活有人干" |
+| 🎨 锦上添花 | 体验优化、UI 调整 | ×0.6 | "老板喜欢，用户无感" |
+| 💀 存在即浪费 | 没人用、没人懂 | ×0.2 | "删了也没人发现" |
+
+### 📊 参考指标（机器计算）
+
+- **substance_score**：实质分（有效代码行、函数/类新增、测试覆盖）
+- **bullshit_score**：水分（格式化、重命名、自动生成、复制粘贴）
+
+> ⚠️ 这些是参考数据，不再是核心评判标准
+
+### 最终得分公式
+
+```
+最终得分 = 基础分 × 业务价值系数 × 重写指数系数
+```
+
+**举例**：
+- 写了个 CRUD 接口（基础分 20）+ 锦上添花（×0.6）+ AI 能写（×0.5）= **6 分** 💀
+- 修了个支付 bug（基础分 15）+ 核心资产（×1.5）+ 需要业务知识（×1.0）= **22.5 分** 👑
+
+### 传统维度（保留参考）
+
+<details>
+<summary>Complexity Score / Impact Score（点击展开）</summary>
+
+#### Complexity Score（技术深度）1-5
 
 | 分数 | 等级 | 例子 |
 |------|------|------|
@@ -64,7 +109,7 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
 | 4 | 硬核级 | 新功能、架构调整 |
 | 5 | 神仙级 | 算法设计、系统级重构 |
 
-### Impact Score（影响范围）1-5
+#### Impact Score（影响范围）1-5
 
 | 分数 | 等级 | 例子 |
 |------|------|------|
@@ -74,12 +119,7 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
 | 4 | 大动干戈 | 跨模块、API 变更 |
 | 5 | 伤筋动骨 | 核心基础设施 |
 
-### 客观指标（机器计算）
-
-- **substance_score**：实质分（有效代码行、函数/类新增、测试覆盖）
-- **bullshit_score**：水分（格式化、重命名、自动生成、复制粘贴）
-
-最终得分 = substance_score × quality_multiplier（AI 判断代码质量）
+</details>
 
 ## 特殊成就徽章
 
@@ -100,7 +140,7 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
 
 ```json
 {
-  "report_date": "2024-01-15",
+  "report_date": "2026-01-29",
   "team_summary": {
     "total_commits": 23,
     "real_work_score": 156,
@@ -113,8 +153,6 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
     {
       "rank": 1,
       "name": "alice",
-      "substance_score": 45,
-      "quality_multiplier": 1.1,
       "final_score": 49.5,
       "grade": "🔥 夯",
       "title": "代码之神",
@@ -122,12 +160,33 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
       "commits": 5,
       "badges": ["🚀 线上救火队长"],
       "summary": "今天单挑了整个支付模块重构",
-      "linus_review": "Finally, someone who knows what they're doing."
+      "linus_review": "Finally, someone who knows what they're doing.",
+      "ai_survivor_score": 85,
+      "ai_verdict": "核心资产守护者，AI 替代不了",
+      "future_advice": "继续深耕业务，你的领域知识是护城河"
     }
   ],
-  "commits": [...],
-  "daily_roast": "alice 一个人把团队平均分拉高了 50%",
-  "closing_rant": "The rest of you should take notes. This is what competent code looks like."
+  "commits": [
+    {
+      "sha": "a1b2c3d4",
+      "author": "alice",
+      "rewrite_index": 4,
+      "business_value": "💎 核心资产",
+      "final_score": 22.5,
+      "roast": "支付模块敢动？胆子不小",
+      "linus_says": "At least someone understands the payment flow.",
+      "ai_could_write": "AI 能写框架，但细节需要人"
+    }
+  ],
+  "ai_era_verdict": {
+    "team_ai_survivor_score": 72,
+    "most_irreplaceable": "alice - 支付领域专家",
+    "most_replaceable": "bob - 今天全是 CRUD（善意提醒）",
+    "team_future": "核心成员稳固，建议减少机械性工作",
+    "linus_ai_rant": "Half of you are competing with ChatGPT. Guess who's winning?"
+  },
+  "daily_roast": "alice 一个人把团队 AI 生存指数拉高了 20 点",
+  "closing_rant": "In 2026, if AI can write your code, why are you here?"
 }
 ```
 
@@ -150,3 +209,26 @@ python $SKILL_DIR/scripts/generate_report.py analysis.json
 ### 老板须知
 
 如果你想用这个来监控员工，建议先体验一下被 AI 评为「拉完了」的感觉。
+
+---
+
+## 🔬 深度分析模式
+
+需要更深入的代码分析？查看 [Analyze Mode](./modes/ANALYZE_MODE.md)：
+
+- **灵魂三问**：AI 重写成本？干活还是演戏？2026 年还有存在必要？
+- **业务上下文收集**：不只看代码，还看 README、Issue、PR 历史
+- **维护 vs 重写决策**：什么时候该让 AI 重写，什么时候该小心维护
+
+### AI 生存指数
+
+每个人额外获得 **AI Survivor Score**（0-100）：
+
+| 分数 | 判定 | 建议 |
+|------|------|------|
+| 80+ | 🛡️ AI 替代不了 | 你是团队核心资产 |
+| 60-79 | ⚔️ 有一战之力 | 继续深耕领域知识 |
+| 40-59 | ⚠️ 危险边缘 | 该学点 AI 做不到的了 |
+| < 40 | 💀 建议转型 | 你在和 ChatGPT 抢饭碗 |
+
+> Linus: *"In 2026, if AI can write your code, why are you here?"*
