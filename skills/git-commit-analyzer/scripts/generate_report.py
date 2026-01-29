@@ -1,164 +1,248 @@
 #!/usr/bin/env python3
 """
-Generate formatted reports from analysis JSON output.
-牛马鉴定报告生成器 🐂🐴
+Generate formatted reports from Claude's analysis JSON output.
+Displays both playful corporate style and Linus-style comments together.
 """
 
 import argparse
 import json
 from datetime import datetime
 
-GRADES = [
-    (40, "🔥 夯", "代码之神", "建议申请调薪"),
-    (25, "💎 顶级", "团队支柱", "老板看了直呼内行"),
-    (15, "👑 人上人", "稳定输出", "职场中坚力量"),
-    (5, "🧍 NPC", "打工人", "今天也是普通的一天"),
-    (0, "💀 拉完了", "带薪摸鱼", "明天记得努力"),
-]
+I18N = {
+    "zh": {
+        "title": "🐂🐴 牛马鉴定报告",
+        "date": "日期",
+        "team_vibe": "今日氛围",
+        "linus_mood": "Linus 心情",
+        "team_summary": "📊 团队总览",
+        "total_commits": "总提交数",
+        "real_work_score": "实际工作分",
+        "bullshit_ratio": "水分比例",
+        "team_grade": "团队评级",
+        "mvp": "今日 MVP",
+        "leaderboard": "🏆 牛马排行榜",
+        "rank": "排名",
+        "name": "牛马",
+        "score": "得分",
+        "grade": "等级",
+        "title": "称号",
+        "award": "颁奖词",
+        "commits": "提交数",
+        "effective_lines": "有效行数",
+        "badges": "徽章",
+        "commit_details": "📝 提交明细",
+        "complexity": "技术深度",
+        "impact": "影响范围",
+        "substance": "实质分",
+        "bullshit": "水分",
+        "quality": "质量系数",
+        "final": "最终得分",
+        "wall_of_shame": "🚨 耻辱墙",
+        "daily_roast": "🎤 今日金句",
+        "closing_rant": "🎤 Linus 收尾",
+        "disclaimer": "本报告由 AI 生成，仅供娱乐，严禁用于绩效评估。",
+    },
+    "en": {
+        "title": "🐂🐴 Code Commit Report",
+        "date": "Date",
+        "team_vibe": "Team Vibe",
+        "linus_mood": "Linus Mood",
+        "team_summary": "📊 Team Summary",
+        "total_commits": "Total Commits",
+        "real_work_score": "Real Work Score",
+        "bullshit_ratio": "Bullshit Ratio",
+        "team_grade": "Team Grade",
+        "mvp": "Today's MVP",
+        "leaderboard": "🏆 Leaderboard",
+        "rank": "Rank",
+        "name": "Name",
+        "score": "Score",
+        "grade": "Grade",
+        "title": "Title",
+        "award": "Award",
+        "commits": "Commits",
+        "effective_lines": "Effective Lines",
+        "badges": "Badges",
+        "commit_details": "📝 Commit Details",
+        "complexity": "Complexity",
+        "impact": "Impact",
+        "substance": "Substance",
+        "bullshit": "Bullshit",
+        "quality": "Quality",
+        "final": "Final Score",
+        "wall_of_shame": "🚨 Wall of Shame",
+        "daily_roast": "🎤 Daily Roast",
+        "closing_rant": "🎤 Linus Closing",
+        "disclaimer": "This report is AI-generated for entertainment only. Not for performance evaluation.",
+    },
+}
 
-def get_grade(score: float) -> tuple[str, str, str]:
-    """Get grade based on effort score."""
-    for threshold, grade, title, comment in GRADES:
-        if score >= threshold:
-            return grade, title, comment
-    return GRADES[-1][1:4]
 
-def generate_markdown_report(analysis: dict) -> str:
-    """Generate Markdown report from analysis data."""
-    
+def generate_markdown_report(analysis: dict, lang: str = "zh") -> str:
+    t = I18N.get(lang, I18N["en"])
     lines = []
-    
-    # Header
-    lines.append("# 🐂🐴 今日牛马鉴定报告")
+
+    lines.append(f"# {t['title']}")
     lines.append("")
-    lines.append(f"**日期**: {analysis.get('report_date', datetime.now().strftime('%Y-%m-%d'))}")
+    lines.append(
+        f"**{t['date']}**: {analysis.get('report_date', datetime.now().strftime('%Y-%m-%d'))}"
+    )
+    if analysis.get("team_vibe"):
+        lines.append(f"**{t['team_vibe']}**: {analysis['team_vibe']}")
+    if analysis.get("linus_mood"):
+        lines.append(f"**{t['linus_mood']}**: {analysis['linus_mood']}")
     lines.append("")
-    
-    # Team Summary
+
     team = analysis.get("team_summary", {})
     if team:
-        lines.append("## 📊 团队总览")
+        lines.append(f"## {t['team_summary']}")
         lines.append("")
-        lines.append(f"| 指标 | 数值 |")
+        lines.append(
+            f"| {'指标' if lang == 'zh' else 'Metric'} | {'数值' if lang == 'zh' else 'Value'} |"
+        )
         lines.append("|------|------|")
-        lines.append(f"| 总提交数 | {team.get('total_commits', 0)} |")
-        lines.append(f"| 团队总分 | {team.get('team_effort_score', 0)} |")
-        lines.append(f"| 团队评级 | {team.get('team_grade', '未评级')} |")
-        lines.append(f"| 今日 MVP | {team.get('mvp', '无')} |")
+        lines.append(f"| {t['total_commits']} | {team.get('total_commits', 0)} |")
+        lines.append(
+            f"| {t['real_work_score']} | {team.get('real_work_score', team.get('team_effort_score', 0))} |"
+        )
+        lines.append(f"| {t['bullshit_ratio']} | {team.get('bullshit_ratio', 'N/A')} |")
+        lines.append(f"| {t['team_grade']} | {team.get('team_grade', 'N/A')} |")
+        lines.append(f"| {t['mvp']} | {team.get('mvp', 'N/A')} |")
         lines.append("")
+
         if team.get("daily_vibe"):
-            lines.append(f"> {team['daily_vibe']}")
+            lines.append(f"> 💬 {team['daily_vibe']}")
             lines.append("")
-    
-    # Leaderboard
+        if team.get("linus_says"):
+            lines.append(f'> 🔥 Linus: *"{team["linus_says"]}"*')
+            lines.append("")
+
     leaderboard = analysis.get("leaderboard", [])
     if leaderboard:
-        lines.append("## 🏆 牛马排行榜")
+        lines.append(f"## {t['leaderboard']}")
         lines.append("")
-        
+
         for entry in leaderboard:
-            rank_emoji = {1: "🥇", 2: "🥈", 3: "🥉"}.get(entry.get("rank", 0), "🏅")
-            
-            lines.append(f"### {rank_emoji} #{entry.get('rank', '?')} {entry.get('name', 'Unknown')}")
+            rank = entry.get("rank", "?")
+            rank_emoji = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, "🏅")
+
+            lines.append(f"### {rank_emoji} #{rank} {entry.get('name', 'Unknown')}")
             lines.append("")
-            lines.append(f"**{entry.get('grade', '')}** | {entry.get('title', '')} | 得分: {entry.get('effort_score', 0)}")
+
+            grade = entry.get("grade", "")
+            title = entry.get("title", "")
+            award = entry.get("award", "")
+            score = entry.get("final_score", entry.get("effort_score", 0))
+
+            if title and award:
+                lines.append(f"**{grade}** | {title} | *{award}*")
+            elif title:
+                lines.append(f"**{grade}** | {title}")
+            else:
+                lines.append(f"**{grade}**")
             lines.append("")
-            
+            lines.append(
+                f"{t['score']}: **{score}** | {t['commits']}: {entry.get('commits', 0)} | {t['effective_lines']}: {entry.get('effective_lines', 0)}"
+            )
+            lines.append("")
+
             badges = entry.get("badges", [])
             if badges:
-                lines.append(f"徽章: {' '.join(badges)}")
+                lines.append(f"**{t['badges']}**: {' '.join(badges)}")
                 lines.append("")
-            
+
             if entry.get("summary"):
-                lines.append(f"> {entry['summary']}")
+                lines.append(f"> 💬 {entry['summary']}")
+            if entry.get("linus_review"):
+                lines.append(f'> 🔥 Linus: *"{entry["linus_review"]}"*')
+            if entry.get("summary") or entry.get("linus_review"):
                 lines.append("")
-    
-    # By Contributor (fallback for old format)
-    by_contributor = analysis.get("by_contributor", {})
-    if by_contributor and not leaderboard:
-        lines.append("## 👥 贡献者鉴定")
-        lines.append("")
-        lines.append("| 牛马 | 提交数 | 得分 | 等级 | 称号 |")
-        lines.append("|------|--------|------|------|------|")
-        
-        sorted_contributors = sorted(
-            by_contributor.items(),
-            key=lambda x: x[1].get('total_effort_score', 0),
-            reverse=True
-        )
-        
-        for name, stats in sorted_contributors:
-            score = stats.get('total_effort_score', 0)
-            grade, title, _ = get_grade(score)
-            lines.append(
-                f"| {name} | {stats.get('commits', 0)} | "
-                f"{score:.0f} | {grade} | {title} |"
-            )
-        lines.append("")
-    
-    # Commit Details
+
     commits = analysis.get("commits", [])
     if commits:
-        lines.append("## 📝 提交明细")
+        lines.append(f"## {t['commit_details']}")
         lines.append("")
-        
+
         for c in commits:
-            type_emoji = {
-                "feature": "✨",
-                "bugfix": "🐛",
-                "refactor": "♻️",
-                "chore": "🔧",
-                "docs": "📚",
-                "test": "🧪",
-                "style": "💄"
-            }.get(c.get("type", ""), "📦")
-            
-            lines.append(f"#### {type_emoji} `{c.get('sha', 'N/A')[:8]}` by {c.get('author', 'Unknown')}")
+            quality_emoji = {
+                "good": "✨",
+                "acceptable": "👍",
+                "poor": "😐",
+                "shit": "💩",
+            }.get(c.get("code_quality", ""), "📦")
+
+            lines.append(
+                f"### {quality_emoji} `{c.get('sha', 'N/A')[:8]}` - {c.get('author', 'Unknown')}"
+            )
             lines.append("")
-            lines.append(f"复杂度 {c.get('complexity', 0)}/5 × 影响 {c.get('impact', 0)}/5 = **{c.get('effort_score', 0):.1f}分**")
+
+            complexity = c.get("complexity", "")
+            impact = c.get("impact", "")
+            if complexity and impact:
+                lines.append(
+                    f"{t['complexity']}: {complexity}/5 | {t['impact']}: {impact}/5 | "
+                    f"**{t['final']}: {c.get('final_score', c.get('effort_score', 0))}**"
+                )
+            else:
+                lines.append(
+                    f"{t['substance']}: {c.get('substance_score', 0)} | "
+                    f"{t['bullshit']}: {c.get('bullshit_score', 0)} | "
+                    f"**{t['final']}: {c.get('final_score', 0)}**"
+                )
             lines.append("")
-            
+
             if c.get("roast"):
                 lines.append(f"> 💬 {c['roast']}")
+            if c.get("linus_says"):
+                lines.append(f'> 🔥 Linus: *"{c["linus_says"]}"*')
+            if c.get("roast") or c.get("linus_says"):
                 lines.append("")
-            elif c.get("analysis"):
-                lines.append(f"> {c['analysis']}")
-                lines.append("")
-            
+
             badges = c.get("badges", [])
             if badges:
                 lines.append(f"🏅 {' '.join(badges)}")
                 lines.append("")
-    
-    # Daily Roast
+
+    wall = analysis.get("wall_of_shame", [])
+    if wall:
+        lines.append(f"## {t['wall_of_shame']}")
+        lines.append("")
+        for item in wall:
+            lines.append(f"- {item}")
+        lines.append("")
+
     if analysis.get("daily_roast"):
         lines.append("---")
         lines.append("")
-        lines.append(f"### 🎤 今日毒舌")
+        lines.append(f"## {t['daily_roast']}")
         lines.append("")
         lines.append(f"*{analysis['daily_roast']}*")
         lines.append("")
-    
-    # Footer
+
+    if analysis.get("closing_rant"):
+        lines.append(f"## {t['closing_rant']}")
+        lines.append("")
+        lines.append(f"*{analysis['closing_rant']}*")
+        lines.append("")
+
     lines.append("---")
     lines.append("")
-    lines.append("*本报告由 AI 生成，仅供娱乐，不代表任何绩效评价。如有雷同，纯属巧合。*")
-    
+    lines.append(f"*{t['disclaimer']}*")
+
     return "\n".join(lines)
 
 
-def generate_html_report(analysis: dict) -> str:
-    """Generate HTML report from analysis data."""
-    
-    md_content = generate_markdown_report(analysis)
-    
-    # Simple HTML wrapper with basic styling
-    html = f'''<!DOCTYPE html>
-<html lang="zh-CN">
+def generate_html_report(analysis: dict, lang: str = "zh") -> str:
+    md_content = generate_markdown_report(analysis, lang)
+    html_lang = "zh-CN" if lang == "zh" else "en"
+    title = "牛马鉴定报告" if lang == "zh" else "Code Commit Report"
+
+    return f'''<!DOCTYPE html>
+<html lang="{html_lang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代码提交分析报告</title>
+    <title>{title}</title>
     <style>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -174,52 +258,53 @@ def generate_html_report(analysis: dict) -> str:
         table {{ border-collapse: collapse; width: 100%; margin: 20px 0; }}
         th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
         th {{ background: #f5f5f5; }}
-        tr:hover {{ background: #f9f9f9; }}
-        blockquote {{ 
-            border-left: 4px solid #3498db; 
-            margin: 10px 0; 
-            padding: 10px 20px; 
+        blockquote {{
+            border-left: 4px solid #3498db;
+            margin: 10px 0;
+            padding: 10px 20px;
             background: #f8f9fa;
+            font-style: italic;
         }}
         code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }}
-        .highlight {{ background: #fff3cd; padding: 10px; border-radius: 5px; }}
-        .concern {{ background: #f8d7da; padding: 10px; border-radius: 5px; }}
     </style>
 </head>
 <body>
     <pre style="white-space: pre-wrap;">{md_content}</pre>
 </body>
 </html>'''
-    
-    return html
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generate report from analysis JSON")
-    parser.add_argument("analysis_file", help="Path to analysis.json")
-    parser.add_argument("--format", "-f", choices=["markdown", "html"], default="markdown")
+    parser.add_argument("analysis_file", help="Path to analysis.json (Claude output)")
+    parser.add_argument(
+        "--format", "-f", choices=["markdown", "html"], default="markdown"
+    )
+    parser.add_argument(
+        "--lang", "-l", choices=["zh", "en"], default="zh", help="Output language"
+    )
     parser.add_argument("--output", "-o", help="Output file path")
-    
+
     args = parser.parse_args()
-    
+
     with open(args.analysis_file, "r", encoding="utf-8") as f:
         analysis = json.load(f)
-    
+
     if args.format == "html":
-        content = generate_html_report(analysis)
+        content = generate_html_report(analysis, args.lang)
         ext = ".html"
     else:
-        content = generate_markdown_report(analysis)
+        content = generate_markdown_report(analysis, args.lang)
         ext = ".md"
-    
+
     if args.output:
         output_path = args.output
     else:
         output_path = args.analysis_file.replace(".json", f"_report{ext}")
-    
+
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(content)
-    
+
     print(f"Report generated: {output_path}")
 
 

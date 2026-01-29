@@ -13,53 +13,42 @@ export GITLAB_TOKEN="glpat-xxxxxxxxxxxx"
 export GITLAB_URL="https://gitlab.com"  # or self-hosted URL
 ```
 
-## Analysis Parameters
+## Script Parameters
 
-### Customizing Type Multipliers
-
-Edit the effort calculation in your workflow:
-
-```python
-TYPE_MULTIPLIERS = {
-    "feature": 1.0,
-    "bugfix": 1.0,
-    "refactor": 0.9,
-    "chore": 0.5,
-    "docs": 0.3,
-    "test": 0.7,
-    "style": 0.3,
-}
+### fetch_commits.py
+```bash
+python fetch_commits.py /path/to/repo --since "1 day ago" -o commits.json
+python fetch_commits.py --github owner/repo --since "1 week ago"
+python fetch_commits.py --gitlab project-id --since "2024-01-01"
 ```
 
-Adjust based on your team's priorities. For example, if tests are critical:
-```python
-"test": 1.0,  # Elevate test importance
+### analyze_code.py
+```bash
+python analyze_code.py commits.json -o metrics.json
 ```
 
-### Complexity/Impact Scale Customization
+### generate_prompt.py
+```bash
+python generate_prompt.py commits.json --lang zh > prompt.txt  # Chinese
+python generate_prompt.py commits.json --lang en > prompt.txt  # English
+python generate_prompt.py commits.json --max-commits 100
+```
 
-The default 1-5 scale can be interpreted based on your codebase:
-
-**For microservices:**
-- Impact 4 = affects service API
-- Impact 5 = affects inter-service communication
-
-**For monolith:**
-- Impact 4 = affects multiple modules
-- Impact 5 = affects core domain logic
+### generate_report.py
+```bash
+python generate_report.py analysis.json --lang zh  # Chinese
+python generate_report.py analysis.json --lang en  # English
+python generate_report.py analysis.json -f html    # HTML format
+```
 
 ## CI/CD Integration
 
-### GitHub Actions Example
-
+### GitHub Actions
 ```yaml
 name: Daily Commit Analysis
-
 on:
   schedule:
-    - cron: '0 9 * * 1-5'  # 9 AM weekdays
-  workflow_dispatch:
-
+    - cron: '0 9 * * 1-5'
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -67,68 +56,32 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Fetch commits
-        run: |
-          python scripts/fetch_commits.py . \
-            --since "1 day ago" \
-            --output commits.json
-      
-      - name: Analyze with Claude
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          # Your analysis integration here
-          python scripts/generate_prompt.py commits.json > prompt.txt
-          # Call Claude API with prompt.txt
-      
-      - name: Post to Slack
-        # Your notification integration
+      - run: |
+          python scripts/fetch_commits.py . --since "1 day ago" -o commits.json
+          python scripts/analyze_code.py commits.json
+          python scripts/generate_prompt.py commits.json --lang en > prompt.txt
 ```
 
-### GitLab CI Example
-
+### GitLab CI
 ```yaml
 commit-analysis:
   stage: report
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
-    - pip install requests
     - python scripts/fetch_commits.py --gitlab $CI_PROJECT_ID --since "1 day ago"
-    - python scripts/generate_prompt.py commits.json | your-claude-integration
+    - python scripts/analyze_code.py commits.json
+    - python scripts/generate_prompt.py commits.json --lang en
 ```
 
-## Report Templates
-
-### Daily Standup Format
-
-Focus on: what was done, blockers, what's next
-
-### Weekly Summary Format
-
-Focus on: major achievements, trends, team velocity
-
-### Sprint Retrospective Format
-
-Focus on: completed features, tech debt addressed, lessons learned
-
-## Filtering Options
+## Filtering
 
 ### By Author
 ```bash
-# In your workflow, filter commits JSON by author
 jq '.commits | map(select(.author.name == "Alice"))' commits.json
 ```
 
 ### By Path
 ```bash
-# Filter to specific directories
 git log --since="1 day ago" -- src/api/
-```
-
-### By Type (via commit message convention)
-If using conventional commits:
-```bash
-git log --since="1 day ago" --grep="^feat:"
 ```
