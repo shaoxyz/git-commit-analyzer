@@ -36,23 +36,29 @@
 
 ```bash
 npx skills add shaoxyz/git-commit-analyzer
-
-# ast-grep（可选，启用多语言代码分析）
-npm i -g @ast-grep/cli
 ```
+
+## 依赖
+
+| 依赖 | 用途 | 必须 |
+|------|------|------|
+| Python 3.8+ | 运行分析脚本 | ✅ |
+| Git | 获取提交记录 | ✅ |
+| ast-grep | 多语言代码分析 | 可选 |
+
+> 💡 不装也行，反正在 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) / [opencode](https://github.com/opencode-ai/opencode) 等工具中执行时，缺失依赖会自动修复，模型会自己想办法。
 
 ## Quick Start
 
 ```bash
-SKILL_DIR=~/.claude/skills/git-commit-analyzer
+# 在 Claude Code / opencode 中直接调用
+/git-commit-analyzer
 
-# 获取 → 分析 → Prompt → Claude → 报告
-python $SKILL_DIR/scripts/fetch_commits.py /path/to/repo --since "1 day ago" -o commits.json
-python $SKILL_DIR/scripts/analyze_code.py commits.json
-python $SKILL_DIR/scripts/generate_prompt.py commits.json > prompt.txt
-# 发给 Claude，保存结果为 analysis.json
-python $SKILL_DIR/scripts/generate_report.py analysis.json
+# 或带参数
+/git-commit-analyzer --repo /path/to/repo --since "1 day ago"
 ```
+
+AI 会自动完成：获取提交 → 代码分析 → 生成报告 → 输出牛马鉴定结果。
 
 ## 文档
 
