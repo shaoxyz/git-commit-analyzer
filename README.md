@@ -62,13 +62,9 @@ AI 会自动完成：获取提交 → 代码分析 → 生成报告 → 输出�
 
 ## 示例报告
 
-![牛马鉴定报告预览](./examples/report-preview.png)
+<a href="./examples/report-preview.png"><img src="./examples/report-preview.png" width="600" alt="牛马鉴定报告预览 - 点击查看原图"></a>
 
-<details>
-<summary>查看完整 HTML 报告</summary>
-
-下载 [examples/git-commit-report-2026-01-29.html](./examples/git-commit-report-2026-01-29.html) 后用浏览器打开。
-</details>
+> 💡 点击图片查看原图 | 下载 [完整 HTML 报告](./examples/git-commit-report-2026-01-29.html) 用浏览器打开体验交互效果
 
 ## 文档
 
