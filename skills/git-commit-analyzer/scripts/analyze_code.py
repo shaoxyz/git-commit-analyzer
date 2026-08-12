@@ -10,21 +10,22 @@ Detects bullshit patterns and calculates real contribution metrics.
 import argparse
 import json
 import re
-from dataclasses import dataclass, asdict, field
-from pathlib import Path
+from dataclasses import asdict, dataclass, field
 
 AST_GREP_AVAILABLE = False
 analyze_diff_with_ast_grep = None
-get_linus_comments_for_issues = None
+get_sharp_comments_for_issues = None
 
 try:
     from ast_analyzer import (
         analyze_diff_with_ast_grep as _analyze_diff,
-        get_linus_comments_for_issues as _get_linus_comments,
+    )
+    from ast_analyzer import (
+        get_sharp_comments_for_issues as _get_sharp_comments,
     )
 
     analyze_diff_with_ast_grep = _analyze_diff
-    get_linus_comments_for_issues = _get_linus_comments
+    get_sharp_comments_for_issues = _get_sharp_comments
     AST_GREP_AVAILABLE = True
 except ImportError:
     pass
@@ -138,7 +139,7 @@ def parse_diff(diff_text: str) -> dict:
 
     for line in diff_text.split("\n"):
         # New file header
-        if line.startswith("+++ b/") or line.startswith("+++ "):
+        if line.startswith(("+++ b/", "+++ ")):
             if current_file:
                 files.append(
                     {
@@ -176,15 +177,7 @@ def is_whitespace_only(line: str) -> bool:
 def is_comment_line(line: str) -> bool:
     """Check if line is a comment (simple heuristic)."""
     stripped = line.strip()
-    return (
-        stripped.startswith("#")
-        or stripped.startswith("//")
-        or stripped.startswith("/*")
-        or stripped.startswith("*")
-        or stripped.startswith('"""')
-        or stripped.startswith("'''")
-        or stripped.startswith("<!--")
-    )
+    return stripped.startswith(("#", "//", "/*", "*", '"""', "'''", "<!--"))
 
 
 def count_effective_lines(lines: list[str]) -> int:
@@ -234,8 +227,8 @@ def detect_formatting_only(added: list[str], deleted: list[str]) -> bool:
         return False
 
     # Normalize: remove all whitespace
-    norm_added = set(re.sub(r"\s+", "", line) for line in added if line.strip())
-    norm_deleted = set(re.sub(r"\s+", "", line) for line in deleted if line.strip())
+    norm_added = {re.sub(r"\s+", "", line) for line in added if line.strip()}
+    norm_deleted = {re.sub(r"\s+", "", line) for line in deleted if line.strip()}
 
     # If normalized versions are identical, it's just formatting
     if norm_added == norm_deleted and len(norm_added) > 0:
@@ -272,7 +265,6 @@ def analyze_commit(commit: dict) -> CodeMetrics:
 
     diff_text = commit.get("diff", "")
     stats = commit.get("stats", {})
-    changed_files = commit.get("changed_files", [])
     message = commit.get("message", "").lower()
 
     # Basic stats from git
@@ -357,7 +349,7 @@ def analyze_commit(commit: dict) -> CodeMetrics:
         AST_GREP_AVAILABLE
         and files
         and analyze_diff_with_ast_grep
-        and get_linus_comments_for_issues
+        and get_sharp_comments_for_issues
     ):
         ast_result = analyze_diff_with_ast_grep(files)
         metrics.ast_grep_issues = ast_result.get("total_matches", 0)
@@ -366,8 +358,8 @@ def analyze_commit(commit: dict) -> CodeMetrics:
         for match in ast_result.get("matches", [])[:10]:
             metrics.code_smells.append(f"{match['rule']}: {match['description']}")
 
-        linus_comments = get_linus_comments_for_issues(ast_result.get("matches", []))
-        metrics.warnings.extend(linus_comments[:3])
+        sharp_comments = get_sharp_comments_for_issues(ast_result.get("matches", []))
+        metrics.warnings.extend(sharp_comments[:3])
 
     metrics.substance_score = calculate_substance_score(metrics)
     metrics.bullshit_score = calculate_bullshit_score(metrics)

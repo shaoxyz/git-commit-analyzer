@@ -5,12 +5,10 @@ Multi-language support with pattern-based detection.
 """
 
 import json
-import os
-import re
 import shutil
 import subprocess
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -20,7 +18,7 @@ class AstPattern:
     pattern: str
     lang: str
     severity: str  # "error", "warning", "info"
-    category: str  # "smell", "ai_generated", "antipattern", "security"
+    category: str  # "smell", "maintainability", "antipattern", "security"
     description: str
     bullshit_score: int = 0
 
@@ -138,13 +136,13 @@ DETECTION_RULES: list[AstPattern] = [
         bullshit_score=3,
     ),
     
-    # === AI-Generated Code Patterns ===
+    # === Maintainability Patterns ===
     AstPattern(
         name="verbose_if_else_return",
         pattern="if ($COND) { return true; } else { return false; }",
         lang="javascript,typescript,tsx,java",
         severity="info",
-        category="ai_generated",
+        category="maintainability",
         description="Verbose if-else return - could be 'return $COND'",
         bullshit_score=2,
     ),
@@ -153,7 +151,7 @@ DETECTION_RULES: list[AstPattern] = [
         pattern="if ($COND) { return $A; } else { $$$B }",
         lang="javascript,typescript,tsx",
         severity="info",
-        category="ai_generated",
+        category="maintainability",
         description="Redundant else after return",
         bullshit_score=1,
     ),
@@ -218,11 +216,12 @@ def run_ast_grep(
                 capture_output=True,
                 text=True,
                 timeout=10,
+                check=False,
             )
             if result.returncode == 0 and result.stdout.strip():
                 return json.loads(result.stdout)
-        except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
-            pass
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+            return []
 
     return []
 
@@ -324,7 +323,7 @@ def analyze_diff_with_ast_grep(diff_files: list[dict]) -> dict:
 def summarize_issues(matches: list[dict]) -> dict:
     """Create summary of detected issues."""
     by_severity = {"error": 0, "warning": 0, "info": 0}
-    by_category = {"smell": 0, "antipattern": 0, "ai_generated": 0, "security": 0}
+    by_category = {"smell": 0, "maintainability": 0, "antipattern": 0, "security": 0}
     by_rule = {}
 
     for m in matches:
@@ -341,21 +340,21 @@ def summarize_issues(matches: list[dict]) -> dict:
     }
 
 
-def get_linus_comments_for_issues(matches: list[dict]) -> list[str]:
-    """Generate Linus-style comments for detected issues."""
+def get_sharp_comments_for_issues(matches: list[dict]) -> list[str]:
+    """Generate direct, code-focused comments for detected issues."""
     comments = []
 
     issue_comments = {
-        "empty_catch": "Empty catch block? Are you fucking kidding me? That's not error handling, that's error hiding.",
-        "empty_except": "except: pass? This is not Python, this is a fucking crime against debugging.",
+        "empty_catch": "An empty catch block is error hiding, not error handling.",
+        "empty_except": "except: pass makes failures invisible and debugging needlessly hard.",
         "console_log": "console.log in production code? What is this, a debugging session from 2010?",
         "debugger_statement": "You left a debugger statement? Were you born yesterday?",
-        "any_type": "Using 'any' in TypeScript? Then why the fuck are you using TypeScript at all?",
+        "any_type": "Using 'any' here discards the type safety this code is meant to provide.",
         "ts_ignore": "@ts-ignore is not a solution, it's admitting defeat.",
-        "eval_usage": "eval()? EVAL?! This isn't the 90s. Learn to write proper code.",
+        "eval_usage": "eval() creates a serious security and maintainability risk.",
         "innerhtml": "innerHTML assignment? Hello XSS my old friend...",
         "nested_ternary": "Nested ternaries? I see you hate the person who maintains this code. Including yourself.",
-        "verbose_if_else_return": "if (x) return true else return false? Just return x, you absolute donut.",
+        "verbose_if_else_return": "This boolean branch can return the condition directly.",
     }
 
     seen_rules = set()

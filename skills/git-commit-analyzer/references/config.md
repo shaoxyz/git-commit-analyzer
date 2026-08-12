@@ -1,87 +1,53 @@
 # Configuration Reference
 
-## Environment Variables
+`SKILL_ROOT` means the directory containing this skill's `SKILL.md`. Resolve it from the loaded skill location; do not assume `.claude`, `.codex`, or another harness-specific directory.
 
-### GitHub
+## Local Repository
+
+Prefer a local checkout because it needs no network credentials and preserves complete Git history.
+
 ```bash
-export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
+python3 "$SKILL_ROOT/scripts/fetch_commits.py" /path/to/repo \
+  --since "1 day ago" \
+  --until "2026-01-30" \
+  -o commits.json
 ```
 
-### GitLab
+The checkout must contain the requested history. Shallow clones may need their history fetched before analysis.
+
+## GitHub
+
+Set `GITHUB_TOKEN` only in the process environment. Never place a token in a prompt, report, repository file, or command output.
+
 ```bash
-export GITLAB_TOKEN="glpat-xxxxxxxxxxxx"
-export GITLAB_URL="https://gitlab.com"  # or self-hosted URL
+GITHUB_TOKEN=... python3 "$SKILL_ROOT/scripts/fetch_commits.py" \
+  --github owner/repo \
+  --since "2026-01-01T00:00:00Z" \
+  -o commits.json
 ```
 
-## Script Parameters
+## GitLab
 
-### fetch_commits.py
+Set `GITLAB_TOKEN`. Set `GITLAB_URL` only for a self-hosted instance.
+
 ```bash
-python fetch_commits.py /path/to/repo --since "1 day ago" -o commits.json
-python fetch_commits.py --github owner/repo --since "1 week ago"
-python fetch_commits.py --gitlab project-id --since "2024-01-01"
+GITLAB_TOKEN=... GITLAB_URL=https://gitlab.example.com \
+python3 "$SKILL_ROOT/scripts/fetch_commits.py" \
+  --gitlab group/project \
+  --since "2026-01-01T00:00:00Z" \
+  -o commits.json
 ```
 
-### analyze_code.py
+## Analysis and Rendering
+
 ```bash
-python analyze_code.py commits.json -o metrics.json
+python3 "$SKILL_ROOT/scripts/analyze_code.py" commits.json
+python3 "$SKILL_ROOT/scripts/generate_prompt.py" commits.json --lang en -o prompt.md
+python3 "$SKILL_ROOT/scripts/generate_report.py" analysis.json --lang en --format html
 ```
 
-### generate_prompt.py
-```bash
-python generate_prompt.py commits.json --lang zh > prompt.txt  # Chinese
-python generate_prompt.py commits.json --lang en > prompt.txt  # English
-python generate_prompt.py commits.json --max-commits 100
-```
+Use `--max-commits` on `generate_prompt.py` to bound model context. Narrow the time range instead of silently dropping relevant commits when completeness matters.
 
-### generate_report.py
-```bash
-python generate_report.py analysis.json --lang zh  # Chinese
-python generate_report.py analysis.json --lang en  # English
-python generate_report.py analysis.json -f html    # HTML format
-```
+## Filters
 
-## CI/CD Integration
-
-### GitHub Actions
-```yaml
-name: Daily Commit Analysis
-on:
-  schedule:
-    - cron: '0 9 * * 1-5'
-jobs:
-  analyze:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - run: |
-          python scripts/fetch_commits.py . --since "1 day ago" -o commits.json
-          python scripts/analyze_code.py commits.json
-          python scripts/generate_prompt.py commits.json --lang en > prompt.txt
-```
-
-### GitLab CI
-```yaml
-commit-analysis:
-  stage: report
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-  script:
-    - python scripts/fetch_commits.py --gitlab $CI_PROJECT_ID --since "1 day ago"
-    - python scripts/analyze_code.py commits.json
-    - python scripts/generate_prompt.py commits.json --lang en
-```
-
-## Filtering
-
-### By Author
-```bash
-jq '.commits | map(select(.author.name == "Alice"))' commits.json
-```
-
-### By Path
-```bash
-git log --since="1 day ago" -- src/api/
-```
+Apply author or path filters during Git collection when possible. If post-processing is required, preserve the original `commits.json` and write filtered data to a new scratch file.

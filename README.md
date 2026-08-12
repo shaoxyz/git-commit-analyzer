@@ -1,36 +1,16 @@
-# Git Commit Analyzer - 牛马鉴定器 🐂🐴
+# Git Commit Analyzer · 牛马鉴定器 🐂🐴
 
-用 AI 分析 git 提交，鉴定你今天是「夯」还是「拉完了」。
+用确定性指标和 AI 上下文分析 Git 提交：证据认真，表达有趣。
 
-**2026 AI 时代版**：代码量不代表贡献，脑子才是。新增 **重写指数** 和 **业务价值** 评估维度。
+它不按行数论英雄，而是区分机械改动、有效实现、测试与文档、领域知识、诊断难度和真实影响。最终可以输出简洁复盘，也可以生成一份有称号、有徽章、有吐槽的“牛马鉴定报告”。
 
-> *"In 2026, if AI can write your code, why are you here?"* — Linus
+## 特点
 
-## 核心理念
-
-传统指标（行数、提交数）在 Vibe Coding 时代已经过时。本工具回答真正的问题：
-
-- **这代码值多少斤？** → 重写指数（AI 能否快速重写）
-- **这代码解决了什么问题？** → 业务价值（核心资产还是存在即浪费）
-- **这个人在 AI 时代能活吗？** → AI 生存指数
-
-## 评级体系
-
-| 等级 | 称号 | 颁奖词 | Linus 说 |
-|------|------|--------|----------|
-| 🔥 夯 | 代码之神 | 建议申请调薪 | "Not bad." |
-| 💎 顶级 | 团队支柱 | 老板看了直呼内行 | "Acceptable." |
-| 👑 人上人 | 稳定输出 | 职场中坚力量 | "It works, I guess." |
-| 🧍 NPC | 打工人 | 今天也是普通的一天 | "Do you even know what you're doing?" |
-| 💀 拉完了 | 带薪摸鱼 | 明天记得努力 | "What the fuck is this shit?" |
-
-## AI 时代新维度
-
-| 维度 | 问题 | 影响 |
-|------|------|------|
-| 🤖 重写指数 | AI 重写需要多久？ | 1/5 = ×0.5，5/5 = ×1.3 |
-| 💎 业务价值 | 这代码解决了什么问题？ | 核心资产 ×1.5，存在即浪费 ×0.2 |
-| 🛡️ AI 生存指数 | 这个人能被 AI 替代吗？ | 0-100，< 40 建议转型 |
+- **Harness 无关**：适用于能够读取 skill、运行 Python 与 Git 的编码代理，不绑定 Claude Code、Codex、opencode 或特定工具名。
+- **本地优先**：直接分析本地 Git 仓库，也支持 GitHub 和 GitLab。
+- **证据分层**：区分机器指标、启发式信号与上下文判断，并标注置信度。
+- **趣味但不伤人**：吐槽代码和提交模式，不评价人的智力、职业价值或绩效。
+- **双语报告**：支持中文和英文 Markdown / HTML 输出。
 
 ## 安装
 
@@ -38,49 +18,44 @@
 npx skills add shaoxyz/git-commit-analyzer
 ```
 
-## 依赖
-
-| 依赖 | 用途 | 必须 |
-|------|------|------|
-| Python 3.8+ | 运行分析脚本 | ✅ |
-| Git | 获取提交记录 | ✅ |
-| ast-grep | 多语言代码分析 | 可选 |
-
-> 💡 不装也行，反正在 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) / [opencode](https://github.com/opencode-ai/opencode) 等工具中执行时，缺失依赖会自动修复，模型会自己想办法。
-
-## Quick Start
+运行环境需要 Python 3.10+ 和 Git。`ast-grep` 仅用于可选的多语言 AST 信号：
 
 ```bash
-# 在 Claude Code / opencode 中直接调用
-/git-commit-analyzer
-
-# 或带参数
-/git-commit-analyzer --repo /path/to/repo --since "1 day ago"
+npm i -g @ast-grep/cli
 ```
 
-AI 会自动完成：获取提交 → 代码分析 → 生成报告 → 输出牛马鉴定结果。
+## 使用
+
+安装后，在支持 skills 的编码代理中直接提出任务，例如：
+
+```text
+分析当前仓库过去一天的提交，生成一份牛马鉴定报告。
+Review last week's commits and give me a concise, neutral engineering summary.
+比较 Alice 和 Bob 本月的提交模式，但不要把代码量当作贡献。
+```
+
+代理会完成：获取提交 → 计算客观指标 → 补充必要上下文 → 生成分析 → 渲染报告。
+
+脚本也可以独立运行。将 `SKILL_ROOT` 替换为本仓库的 `skills/git-commit-analyzer` 目录：
+
+```bash
+python3 "$SKILL_ROOT/scripts/fetch_commits.py" /path/to/repo --since "1 day ago" -o commits.json
+python3 "$SKILL_ROOT/scripts/analyze_code.py" commits.json
+python3 "$SKILL_ROOT/scripts/generate_prompt.py" commits.json --lang zh -o prompt.md
+python3 "$SKILL_ROOT/scripts/generate_report.py" analysis.json --lang zh --format html
+```
 
 ## 示例报告
 
-<a href="./examples/report-preview.png"><img src="./examples/report-preview.png" width="600" alt="牛马鉴定报告预览 - 点击查看原图"></a>
+<a href="./examples/report-preview.png"><img src="./examples/report-preview.png" width="600" alt="牛马鉴定报告预览"></a>
 
-> 💡 点击图片查看原图 | 下载 [完整 HTML 报告](./examples/git-commit-report-2026-01-29.html) 用浏览器打开体验交互效果
+[查看完整 HTML 示例](./examples/git-commit-report-2026-01-29.html)
 
-## 文档
+## 边界
 
-[完整文档 & 评分算法](./skills/git-commit-analyzer/SKILL.md)
+Diff 看不到调研、失败方案、Code Review、事故压力和许多业务背景。所有分数都应当用于代码复盘和团队娱乐，**不得用于绩效评估或雇佣决策**。
 
-## 重要声明 ⚠️
-
-**测不出来的**：
-- 花一天 debug 最后只改一行的痛
-- code review、带新人的隐形付出
-- 读懂祖传代码所消耗的脑细胞
-- 那些"为什么这样写"只有原作者知道
-
-**当成团队娱乐工具，严禁用于绩效评估。**
-
-在 AI 时代，80%+ 的代码可以被快速生成。但那 20% 的领域知识、架构决策、业务理解 —— 这才是人的价值。
+完整工作流与评分边界见 [`SKILL.md`](./skills/git-commit-analyzer/SKILL.md)。
 
 ## License
 
